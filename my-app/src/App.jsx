@@ -6,6 +6,7 @@ import PrivateRoutes from './utils/PrivateRoutes';
 import RoleBaseRoutes from './utils/RoleBaseRoutes';
 import DepartmentList from './components/department/DepartmentList';
 import AdminSummary from './components/AdminSummary';
+import AddDepartment from './components/department/AddDepartment'; // ✅ Missing import
 
 function App() {
   return (
@@ -25,8 +26,10 @@ function App() {
             </PrivateRoutes>
           }
         >
-          <Route index element={<AdminSummary />} />
-          <Route path="departments" element={<DepartmentList />} />
+          <Route index element={<AdminSummary />}></Route>
+          <Route path="/admin-dashboard/departments" element={<DepartmentList />}></Route>
+          <Route path="/admin-dashboard/add-department" element={<AddDepartment />}></Route>
+          <Route path="/admin-dashboard/department/:id" element={<EditDepartment />}></Route>
         </Route>
 
         {/* Employee Protected Routes */}
@@ -46,3 +49,4 @@ function App() {
 }
 
 export default App;
+
