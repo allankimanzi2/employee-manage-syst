@@ -30,7 +30,7 @@ const AddDepartment = () => {
     } catch (error) {
       if (error.response && !error.response.data.success) {
         alert(error.response.data.error);
-      } else {
+      }else {
         alert("Something went wrong!");
       }
     }

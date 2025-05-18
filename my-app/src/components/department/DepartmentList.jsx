@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
-import { columns } from '../../utils/DepartmentHelper';
+import { columns, DepartmentButtons } from '../../utils/DepartmentHelper';
 import axios from 'axios';
-import { DepartmentButtons } from '../../utils/DepartmentHelper'; // ✅ Make sure it's exported
 
 const DepartmentList = () => {
   const [departments, setDepartments] = useState([]);
@@ -12,8 +11,7 @@ const DepartmentList = () => {
 
   const onDepartmentDelete = (id) => {
     const updated = departments.filter(dep => dep.id !== id); // ✅ use `id`, not `_id`
-    setDepartments(updated);
-    setFilteredDepartments(updated);
+    setDepartments(data);
   };
 
   useEffect(() => {
