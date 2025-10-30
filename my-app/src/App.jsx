@@ -4,11 +4,18 @@ import AdminDashboard from './pages/AdminDashboard';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import PrivateRoutes from './utils/PrivateRoutes';
 import RoleBaseRoutes from './utils/RoleBaseRoutes';
+
 import DepartmentList from './components/department/DepartmentList';
 import AdminSummary from './components/AdminSummary';
 import AddDepartment from './components/department/AddDepartment'; 
-import EditDepartment from './components/department/EditDepartment';
+import EditDepartment from './pages/EditDepartment';
+
 import List from './components/employee/List';
+import Add from './components/employee/Add';
+import View from './components/employee/View';
+import Edit from './components/employee/Edit';
+import AddSalary from './components/salary/Add'
+import ViewSalary from './components/salary/View';
 
 function App() {
   return (
@@ -28,14 +35,16 @@ function App() {
             </PrivateRoutes>
           }
         >
-          <Route index element={<AdminSummary />}></Route>
-          <Route path="/admin-dashboard/departments" element={<DepartmentList />}></Route>
-          <Route path="/admin-dashboard/add-department" element={<AddDepartment />}></Route>
-          <Route path="/admin-dashboard/department/:id" element={<EditDepartment />}></Route>
-          <Route path="/admin-dashboard/employees" element={<List />}></Route>
-          <Route path="/admin-dashboard/add-employee" element={<Add />}></Route>
-          <Route path="/admin-dashboard/employees/:id" element={<View />}></Route>
-          <Route path="/admin-dashboard/employees/edit/:id" element={<Edit/>}></Route>
+          <Route index element={<AdminSummary />} />
+          <Route path="departments" element={<DepartmentList />} />
+          <Route path="add-department" element={<AddDepartment />} />
+          <Route path="department/:id" element={<EditDepartment />} />
+          <Route path="employees" element={<List />} />
+          <Route path="add-employee" element={<Add />} />
+          <Route path="employees/:id" element={<View />} />
+          <Route path="employees/:id" element={<Edit />} />
+          <Route path="employees/salary/:id" element={<ViewSalary />} />
+          <Route path="salary/:id" element={<AddSalary  />} />
         </Route>
 
         {/* Employee Protected Routes */}
@@ -55,4 +64,3 @@ function App() {
 }
 
 export default App;
-
