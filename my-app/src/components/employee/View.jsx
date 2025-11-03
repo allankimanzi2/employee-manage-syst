@@ -15,6 +15,7 @@ const View = () => {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
+      
 
         if (response.data.success) {
           setEmployee(response.data.employee);
