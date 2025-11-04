@@ -1,20 +1,23 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../../context/authContext';
 import axios from 'axios';
+import User from '../../../../server/models/User';
 
 const List = () => {
-    const {user} = useAuth()
-    const [leaves, setLeaves] = useState([])
+    
+    const [leaves, setLeaves] = useState(null)
     let sno = 1;
+    const {id} = useParams()
+    const {user} = useAuth()
 
     const fetchLeaves = async () =>
         try {
-            const response = await axios.get(`http://localhost:5000/api/leave/${user._id}`,{
+            const response = await axios.get(`http://localhost:5000/api/leave/${id}`,{
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
             });
+            console.log(response.data)
             if (response.data.success) {
                 setLeaves(response.data.leaves);
             }
@@ -27,6 +30,10 @@ const List = () => {
         useEffect(() => {
             fetchLeaves();
         }, []);
+
+        if(!leaves) {
+            return <div> Loading</div>
+        }
   return (
     <div className="p-6">
         <div className="text-center">
@@ -38,6 +45,7 @@ const List = () => {
             placeholder="Search by Dep Name"
             className="px-4 py-0.5 border"
             />
+            {user.role === "employee" && (
             <Link
                 to="/admin-dashboard/add-leave"
                 className="px-4 py-1 bg-teal-600 rounded text-white"

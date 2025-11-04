@@ -18,7 +18,8 @@ import AddSalary from './components/salary/Add'
 import ViewSalary from './components/salary/View';
 import Summary from './components/EmployeeDashboard/Summary';
 import LeaveList from './components/leave/List';
-import AddLeave from'./components/leave/Add';
+import AddLeave from './components/leave/Add';
+import Detail from './components/leave/Detail';
 
 function App() {
   return (
@@ -48,6 +49,10 @@ function App() {
           <Route path="/admin-dashboard/employees/:id" element={<Edit />} />
           <Route path="/admin-dashboard/employees/salary/:id" element={<ViewSalary />} />
           <Route path="/admin-dashboard/salary/add" element={<AddSalary  />} />
+          <Route path="/admin-dashboard/leaves" element={<Table />} />
+          <Route path="/admin-dashboard/leaves/:id" element={<Detail />} />
+          <Route path="/admin-dashboard/employees/leaves/:id" element={<LeaveList />} />
+          <Route path="/admin-dashboard/setting" element={<Setting />} />
         </Route>
 
         {/* Employee Protected Routes */}
@@ -64,7 +69,7 @@ function App() {
           <Route index element={<Summary/>}></Route>
 
           <Route path="/employee-dashboard/profile/:id" element={<View />}></Route>
-          <Route path="/employee-dashboard/leaves" element={<LeaveList />}></Route>
+          <Route path="/employee-dashboard/leaves/:id" element={<LeaveList />}></Route>
           <Route path="/employee-dashboard/add-leave" element={<AddLeave />}></Route>
           <Route path="/employee-dashboard/salary/:id" element={<ViewSalary />}></Route>
           <Route path="/employee-dashboard/setting" element={<Setting />}></Route>
