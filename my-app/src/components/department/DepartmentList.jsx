@@ -10,43 +10,43 @@ const DepartmentList = () => {
   const [filteredDepartments, setFilteredDepartments] = useState([]);
 
   const onDepartmentDelete = (id) => {
-    const updated = departments.filter(dep => dep.id !== id); // ✅ use `id`, not `_id`
-    setDepartments(data);
+    fetchDepartments()
+   
+  };
+
+  const fetchDepartments = async () => {
+    setDepLoading(true);
+    try {
+      const response = await axios.get('http://localhost:5000/department', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (response.data.success) {
+        let sno = 1;
+        const data = response.data.departments.map((dep) => ({
+          id: dep._id,
+          sno: sno++,
+          dep_name: dep.dep_name,
+          action: (
+            <DepartmentButtons Id={dep._id} onDepartmentDelete={onDepartmentDelete} />
+          ),
+        }));
+
+        setDepartments(data);
+        setFilteredDepartments(data);
+      }
+    } catch (error) {
+      if (error.response && !error.response.data.success) {
+        alert(error.response.data.error);
+      }
+    } finally {
+      setDepLoading(false);
+    }
   };
 
   useEffect(() => {
-    const fetchDepartments = async () => {
-      setDepLoading(true);
-      try {
-        const response = await axios.get('http://localhost:5000/department', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-
-        if (response.data.success) {
-          let sno = 1;
-          const data = response.data.departments.map((dep) => ({
-            id: dep._id,
-            sno: sno++,
-            dep_name: dep.dep_name,
-            action: (
-              <DepartmentButtons Id={dep._id} onDepartmentDelete={onDepartmentDelete} />
-            ),
-          }));
-
-          setDepartments(data);
-          setFilteredDepartments(data);
-        }
-      } catch (error) {
-        if (error.response && !error.response.data.success) {
-          alert(error.response.data.error);
-        }
-      } finally {
-        setDepLoading(false);
-      }
-    };
-
     fetchDepartments();
   }, []);
 
