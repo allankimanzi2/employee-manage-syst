@@ -6,9 +6,9 @@ import { addLeave, getLeave, getLeaves, getLeaveDetail, updateLeave } from '../c
 const router = express.Router()
 
 router.post('/add', authMiddleware, addLeave)
-router.get('/:id', authMiddleware, getLeave)
-router.get('/:id', authMiddleware, getLeave)
 router.get('detail/:id', authMiddleware, getLeaveDetail)
-router.put('/', authMiddleware, updateLeave)
+router.get('/:id/:role', authMiddleware, getLeave)
+router.get('/', authMiddleware, getLeaves)
+router.put('/:id', authMiddleware, updateLeave)
 
 export default router

@@ -60,7 +60,7 @@ export const fetchDepartments = async () => {
       export const getEmployees = async (id) => {
         let employees;
             try {
-              const response = await axios.get('http://localhost:5000/api/employee/department/${id}', {
+              const response = await axios.get(`http://localhost:5000/api/employee/department/${id}`, {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -98,13 +98,15 @@ export const fetchDepartments = async () => {
                 </button>
                 <button
                     className="px-3 py-1 bg-yellow-600 text-white"
-                    onClick={() => navigate(' /admin-dashboard/employees/salary/${Id}')}
+                    onClick={() => navigate(` /admin-dashboard/employees/salary/${Id}`)}
                 >
                     Salary
                 </button>
                 <button
                     className="px-3 py-1 bg-red-600 text-white rounded"
-                >onClick={() => navigate(`/admin-dashboard/employees/leaves/${Id}`)}>Leave</button>
+                >onClick={() => navigate(`/admin-dashboard/employees/leaves/${Id}`)}
+                >
+                Leave</button>
                 <button
                     className="px-3 py-1 bg-red-600 text-white rounded"
                 >
