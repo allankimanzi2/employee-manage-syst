@@ -15,4 +15,4 @@ const SummaryCard = ({icon, text, number, color}) => {
   )
 }
 
-export default SummaryCard
+export default SummaryCard;
