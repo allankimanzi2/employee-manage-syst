@@ -1,18 +1,18 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 
 // Components
 import AdminSidebar from "../components/dashboard/AdminSidebar";
-import Navbar from "../components/dashboard/Navbar";
+import Navbar from "../components/Navbar";
 
 // Pages
-import AdminHome from "./pages/admin/AdminHome";
-import EmployeesPage from "./pages/admin/EmployeesPage";
-import DepartmentsPage from "./pages/admin/DepartmentsPage";
-import LeavePage from "./pages/admin/LeavePage";
-import SalaryPage from "./pages/admin/SalaryPage";
-import SettingsPage from "./pages/admin/SettingsPage";
+import AdminHome from "./admin/AdminHome";
+import EmployeesPage from "./admin/EmployeesPage";
+import DepartmentsPage from "./admin/DepartmentsPage";
+import LeavePage from "./admin/LeavePage";
+import SalaryPage from "./admin/SalaryPage";
+import SettingsPage from "./admin/SettingsPage";
 
 // ✅ Layout for Admin Dashboard
 const AdminDashboardLayout = () => {
@@ -31,30 +31,5 @@ const AdminDashboardLayout = () => {
   );
 };
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Admin dashboard layout */}
-        <Route path="/admin-dashboard" element={<AdminDashboardLayout />}>
-          <Route index element={<AdminHome />} /> {/* Default page */}
-          <Route path="employees" element={<EmployeesPage />} />
-          <Route path="departments" element={<DepartmentsPage />} />
-          <Route path="leave" element={<LeavePage />} />
-          <Route path="salary" element={<SalaryPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-        </Route>
-
-        {/* Optional: Add a fallback route */}
-        <Route path="*" element={<div>404 - Page Not Found</div>} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;
-
-
-
-
-
+// ✅ Only export layout here; routing happens in App.jsx or top-level router
+export default AdminDashboardLayout;

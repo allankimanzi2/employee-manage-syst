@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { columns } from "../../utils/LeaveHelper";
 import axios from "axios";
-import LeaveButtons from "./LeaveButtons"; // adjust your path
+import LeaveButton from "./LeaveButton";
+
 
 const Table = () => {
   const [leaves, setLeaves] = useState([]);

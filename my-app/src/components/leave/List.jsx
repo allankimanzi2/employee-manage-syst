@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import useAuth from "../../../hooks/useAuth"; // adjust your path
+import { useAuth } from "../../context/authContext";
+
 
 const List = () => {
   const [leaves, setLeaves] = useState(null);

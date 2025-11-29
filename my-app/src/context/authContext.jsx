@@ -1,4 +1,5 @@
 // authContext.jsx
+// src/context/authContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -14,23 +15,15 @@ const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('token');
         if (token) {
           const response = await axios.get('http://localhost:5000/api/auth/verify', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           });
-          console.log(response);
-          if (response.data.success) {
-            setUser(response.data.user);
-          }
+          if (response.data.success) setUser(response.data.user);
         } else {
           setUser(null);
-          setLoading(false);
         }
       } catch (error) {
+        setUser(null);
         console.log(error);
-        if (error.response && !error.response.data.error) {
-          setUser(null);
-        }
       } finally {
         setLoading(false);
       }
@@ -39,10 +32,9 @@ const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (user) => setUser(user);
-
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('token'); // ✅ corrected from `remove.Item`
+    localStorage.removeItem('token');
   };
 
   return (
@@ -54,3 +46,4 @@ const AuthProvider = ({ children }) => {
 
 export const useAuth = () => useContext(userContext);
 export default AuthProvider;
+
