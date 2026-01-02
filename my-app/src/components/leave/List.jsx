@@ -1,112 +1,117 @@
-import React, { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
-
+import API from "../../utils/api";
+import LeaveButton from "./LeaveButton";
 
 const List = () => {
-  const [leaves, setLeaves] = useState(null);
   const { id } = useParams();
   const { user } = useAuth();
-  let sno = 1;
+  const navigate = useNavigate();
 
+  const [leaves, setLeaves] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch leaves from API
   const fetchLeaves = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/leave/${id}/${user.role}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      if (response.data.success) {
-        setLeaves(response.data.leaves);
-      } else {
-        alert("Failed to fetch leaves.");
-      }
-    } catch (error) {
-      console.error("Error fetching leaves:", error);
-      alert(error.response?.data?.error || error.message);
+      setLoading(true);
+      const res = await API.get(`/leave/${id}/${user.role}`);
+      if (res.data.success) setLeaves(res.data.leaves);
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to fetch leaves");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLeaves();
-  }, []);
+    if (id && user?.role) fetchLeaves();
+  }, [id, user?.role]);
 
-  if (!leaves) {
-    return <div className="text-center p-5 text-lg">Loading...</div>;
-  }
+  // Update leave status
+  const changeStatus = async (leaveId, status) => {
+    try {
+      const res = await API.put(`/leave/${leaveId}`, { status });
+      if (res.data.success) {
+        // Update the leaves array locally without refetching
+        setLeaves((prev) =>
+          prev.map((l) =>
+            l._id === leaveId ? { ...l, status: status } : l
+          )
+        );
+      }
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to update leave status");
+    }
+  };
+
+  // Callback when a new leave is added
+  const handleLeaveAdded = (newLeave) => {
+    setLeaves((prev) => [...prev, newLeave]);
+  };
+
+  if (loading) return <div className="text-center mt-10">Loading...</div>;
 
   return (
     <div className="p-6">
-      <div className="text-center mb-4">
-        <h3 className="text-2xl font-bold">Manage Leaves</h3>
-      </div>
+      {/* Add leave button for employees */}
+      {user.role === "employee" && (
+        <Link
+          to="/employee-dashboard/add-leave"
+          className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 mb-4 inline-block"
+        >
+          Add Leave
+        </Link>
+      )}
 
-      <div className="flex justify-between items-center mb-4">
-        <input
-          type="text"
-          placeholder="Search by Dep Name"
-          className="px-4 py-1 border rounded"
-        />
-
-        {user.role === "employee" && (
-          <Link
-            to="/admin-dashboard/add-leave"
-            className="px-4 py-1 bg-teal-600 rounded text-white"
-          >
-            Add New Leave
-          </Link>
-        )}
-      </div>
-
-      <table className="w-full text-sm text-left text-gray-500">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 border border-gray-200">
+      {/* Leaves Table */}
+      <table className="w-full border text-left">
+        <thead className="bg-gray-100 text-gray-700">
           <tr>
-            <th className="px-6 py-3">SNO</th>
-            <th className="px-6 py-3">Leave Type</th>
-            <th className="px-6 py-3">From</th>
-            <th className="px-6 py-3">To</th>
-            <th className="px-6 py-3">Description</th>
-            <th className="px-6 py-3">Status</th>
+            <th className="px-4 py-2">#</th>
+            <th className="px-4 py-2">Type</th>
+            <th className="px-4 py-2">From</th>
+            <th className="px-4 py-2">To</th>
+            <th className="px-4 py-2">Status</th>
+            {user.role === "admin" && <th className="px-4 py-2">Action</th>}
           </tr>
         </thead>
-
         <tbody>
-          {leaves.map((leave) => (
-            <tr
-              key={leave._id}
-              className="bg-white border-b hover:bg-gray-100"
-            >
-              <td className="px-6 py-3">{sno++}</td>
-              <td className="px-6 py-3">{leave.leaveType}</td>
-
-              <td className="px-6 py-3">
-                {new Date(leave.startDate).toLocaleDateString()}
-              </td>
-
-              <td className="px-6 py-3">
-                {new Date(leave.endDate).toLocaleDateString()}
-              </td>
-
-              <td className="px-6 py-3">{leave.reason}</td>
-
-              <td
-                className={`px-6 py-3 font-semibold ${
-                  leave.status === "Approved"
-                    ? "text-green-600"
-                    : leave.status === "Rejected"
-                    ? "text-red-600"
-                    : "text-yellow-600"
-                }`}
-              >
-                {leave.status}
+          {leaves.length === 0 ? (
+            <tr>
+              <td colSpan={user.role === "admin" ? 6 : 5} className="text-center py-4">
+                No leave requests found
               </td>
             </tr>
-          ))}
+          ) : (
+            leaves.map((l, i) => (
+              <tr
+                key={l._id}
+                className="border-b hover:bg-gray-50 cursor-pointer"
+              >
+                <td className="px-4 py-2">{i + 1}</td>
+                <td className="px-4 py-2">{l.leaveType}</td>
+                <td className="px-4 py-2">
+                  {new Date(l.startDate).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-2">
+                  {new Date(l.endDate).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-2">{l.status}</td>
+                {user.role === "admin" && (
+                  <td className="px-4 py-2">
+                    <LeaveButton
+                      leaveId={l._id}
+                      status={l.status}
+                      onApprove={(id) => changeStatus(id, "Approved")}
+                      onReject={(id) => changeStatus(id, "Rejected")}
+                    />
+                  </td>
+                )}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

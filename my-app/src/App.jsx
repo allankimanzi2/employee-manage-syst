@@ -4,7 +4,9 @@ import AdminDashboard from './pages/AdminDashboard';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import PrivateRoutes from './utils/PrivateRoutes';
 import RoleBaseRoutes from './utils/RoleBaseRoutes';
-import SettingsPage from './pages/admin/SettingsPage';
+
+// Admin Components
+import SettingsPage from './components/Settings';
 import DepartmentList from './components/department/DepartmentList';
 import AdminSummary from './components/AdminSummary';
 import AddDepartment from './components/department/AddDepartment'; 
@@ -16,6 +18,8 @@ import View from './components/employee/View';
 import Edit from './components/employee/Edit';
 import AddSalary from './components/salary/Add';
 import ViewSalary from './components/salary/View';
+
+// Employee Components
 import Summary from './components/EmployeeDashboard/Summary';
 import LeaveList from './components/leave/List';
 import AddLeave from './components/leave/Add';
@@ -50,9 +54,12 @@ function App() {
           <Route path="employees/:id/edit" element={<Edit />} />
           <Route path="employees/salary/:id" element={<ViewSalary />} />
           <Route path="salary/add" element={<AddSalary />} />
+
+          {/* ✔ Corrected Leave Route */}
           <Route path="leaves" element={<Table />} />
           <Route path="leaves/:id" element={<Detail />} />
-          <Route path="employees/leaves/:id" element={<LeaveList />} />
+          <Route path="employees/leave/:id" element={<LeaveList />} />
+
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 

@@ -168,11 +168,11 @@ const updateEmployee = async (req, res) => {
   }
 };
 
-const fetchEmployeesByDepId = async (req, res) => {
+const fetchEmployeeByDepId = async (req, res) => {
   const { id } = req.params;
   try {
     const employee = await Employee.find({department: id})
-    return res.status(200).json({ success: true, employees});
+    return res.status(200).json({ success: true, employee});
   } catch (error) {
       return res
         .status(404)
@@ -188,5 +188,5 @@ export {
   getEmployees,
   getEmployee,
   updateEmployee,
-  fetchEmployeesByDepId
+  fetchEmployeeByDepId
 };

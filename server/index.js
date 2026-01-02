@@ -33,6 +33,8 @@ app.use('/api/leave', leaveRouter);
 app.use('/api/setting', settingRouter);
 app.use('/api/dashboard', dashboardRouter);
 
+console.log("JWT_KEY loaded:", process.env.JWT_KEY ? "✅ Yes" : "❌ No");
+
 // Start server
 const PORT = process.env.PORT || 5000;
 

@@ -22,12 +22,42 @@ const AdminSidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1 mt-6 space-y-1 px-3">
-        <SidebarLink to="/admin-dashboard" icon={<FaTachometerAlt />} label="Dashboard" />
-        <SidebarLink to="/admin-dashboard/employees" icon={<FaUsers />} label="Employees" />
-        <SidebarLink to="/admin-dashboard/departments" icon={<FaBuilding />} label="Departments" />
-        <SidebarLink to="/admin-dashboard/leave" icon={<FaCalendarAlt />} label="Leave" />
-        <SidebarLink to="/admin-dashboard/salary" icon={<FaMoneyBillWave />} label="Salary" />
-        <SidebarLink to="/admin-dashboard/settings" icon={<FaCogs />} label="Settings" />
+        <SidebarLink 
+          to="/admin-dashboard" 
+          icon={<FaTachometerAlt />} 
+          label="Dashboard" 
+        />
+
+        <SidebarLink 
+          to="/admin-dashboard/employees" 
+          icon={<FaUsers />} 
+          label="Employees" 
+        />
+
+        <SidebarLink 
+          to="/admin-dashboard/departments" 
+          icon={<FaBuilding />} 
+          label="Departments" 
+        />
+
+        {/* ✔ Correct Leave Route */}
+        <SidebarLink 
+          to="/admin-dashboard/leaves" 
+          icon={<FaCalendarAlt />} 
+          label="Leaves" 
+        />
+
+        <SidebarLink 
+          to="/admin-dashboard/salary/add" 
+          icon={<FaMoneyBillWave />} 
+          label="Add Salary" 
+        />
+
+        <SidebarLink 
+          to="/admin-dashboard/settings" 
+          icon={<FaCogs />} 
+          label="Settings" 
+        />
       </nav>
 
       {/* Footer */}
@@ -61,4 +91,3 @@ const SidebarLink = ({ to, icon, label }) => {
 };
 
 export default AdminSidebar;
-

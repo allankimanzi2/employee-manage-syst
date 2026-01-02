@@ -1,14 +1,28 @@
-import express from 'express'
-import authMiddleware from '../middleware/authMiddleware.js'
-import { addLeave, getLeave, getLeaves, getLeaveDetail, updateLeave } from '../controllers/leaveController.js'
+import express from 'express';
+import authMiddleware from '../middleware/authMiddleware.js';
+import { 
+  addLeave, 
+  getLeave, 
+  getLeaves, 
+  getLeaveDetail, 
+  updateLeave 
+} from '../controllers/leaveController.js';
 
+const router = express.Router();
 
-const router = express.Router()
+// Add Leave
+router.post('/add', authMiddleware, addLeave);
 
-router.post('/add', authMiddleware, addLeave)
-router.get('detail/:id', authMiddleware, getLeaveDetail)
-router.get('/:id/:role', authMiddleware, getLeave)
-router.get('/', authMiddleware, getLeaves)
-router.put('/:id', authMiddleware, updateLeave)
+// Get leave detail by ID
+router.get('/detail/:id', authMiddleware, getLeaveDetail);
 
-export default router
+// Get leave for one employee based on ID and role
+router.get('/:id/:role', authMiddleware, getLeave);
+
+// Get all leaves
+router.get('/', authMiddleware, getLeaves);
+
+// Update leave
+router.put('/:id', authMiddleware, updateLeave);
+
+export default router;

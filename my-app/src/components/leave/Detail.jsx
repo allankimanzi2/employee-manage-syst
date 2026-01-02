@@ -1,147 +1,124 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import API from "../../utils/api";
+import LeaveButtons from "./LeaveButton";
 
 const Detail = () => {
   const { id } = useParams();
-  const [leave, setLeave] = useState(null);
   const navigate = useNavigate();
+  const [leave, setLeave] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // --------------------------
+  // Fetch leave details
+  // --------------------------
   useEffect(() => {
     const fetchLeave = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/leave/detail/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          }
-        );
+        setLoading(true);
+        const res = await API.get(`/leave/detail/${id}`);
 
-        if (response.data.success) {
-          setLeave(response.data.leave);
+        if (res.data.success) {
+          setLeave(res.data.leave);
+          setError(null);
+        } else {
+          setError("Failed to load leave details");
         }
-      } catch (error) {
-        if (error.response && !error.response.data.success) {
-          alert(error.response.data.error);
-        }
+      } catch (err) {
+        console.error(err);
+        setError(err.response?.data?.error || "Failed to fetch leave details");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchLeave();
   }, [id]);
 
-  const changeStatus = async (id, status) => {
+  // --------------------------
+  // Change leave status
+  // --------------------------
+  const changeStatus = async (leaveId, status) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/leave/${id}`,
-        { status },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-
-      if (response.data.success) {
-        navigate('/admin-dashboard/leaves');
-      }
-    } catch (error) {
-      if (error.response && !error.response.data.success) {
-        alert(error.response.data.error);
-      }
+      const res = await API.put(`/leave/${leaveId}`, { status });
+      if (res.data.success) navigate("/admin-dashboard/leaves");
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to update leave status");
     }
   };
 
-  if (!leave || !leave.employeeId || !leave.employeeId.userId || !leave.employeeId.department) {
-    return <div className="text-center mt-10">Loading...</div>;
+  // --------------------------
+  // Loading & Error states
+  // --------------------------
+  if (loading) {
+    return <div className="text-center mt-10">Loading leave details...</div>;
   }
 
+  if (error) {
+    return (
+      <div className="text-center mt-10 text-red-600 font-semibold">{error}</div>
+    );
+  }
+
+  if (!leave || !leave.employeeId || !leave.employeeId.userId) {
+    return (
+      <div className="text-center mt-10 text-red-600 font-semibold">
+        Leave details not available
+      </div>
+    );
+  }
+
+  // --------------------------
+  // Render leave detail
+  // --------------------------
   return (
-    <>
-      <div className="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-md shadow-md">
-        <h2 className="text-2xl font-bold mb-8 text-center">Leave Details</h2>
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-center">Leave Detail</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <img
-              src={`http://localhost:5000/${leave.employeeId.userId.profileImage}`}
-              alt="Profile"
-              className="rounded-full border w-72"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Profile */}
+        <div className="flex justify-center">
+          <img
+            src={leave.employeeId.userId.profileImage || "/default-profile.png"}
+            alt="Profile"
+            className="rounded-full w-48 h-48 border"
+          />
+        </div>
+
+        {/* Details */}
+        <div className="space-y-2">
+          <DetailRow label="Name" value={leave.employeeId.userId.name} />
+          <DetailRow label="Employee ID" value={leave.employeeId.employeeId} />
+          <DetailRow label="Department" value={leave.employeeId.department?.dep_name || "N/A"} />
+          <DetailRow label="Leave Type" value={leave.leaveType} />
+          <DetailRow label="Reason" value={leave.reason} />
+          <DetailRow label="From" value={new Date(leave.startDate).toLocaleDateString()} />
+          <DetailRow label="To" value={new Date(leave.endDate).toLocaleDateString()} />
+          <DetailRow label="Status" value={leave.status} />
+
+          {leave.status === "Pending" && (
+            <LeaveButtons
+              leaveId={leave._id}
+              status={leave.status}
+              onApprove={(id) => changeStatus(id, "Approved")}
+              onReject={(id) => changeStatus(id, "Rejected")}
             />
-          </div>
-
-          <div>
-            <div className="flex space-x-3 mb-2">
-              <p className="text-lg font-bold">Name:</p>
-              <p className="font-medium">{leave.employeeId.userId.name}</p>
-            </div>
-
-            <div className="flex space-x-3 mb-2">
-              <p className="text-lg font-bold">Employee ID:</p>
-              <p className="font-medium">{leave.employeeId.employeeId}</p>
-            </div>
-
-            <div className="flex space-x-3 mb-2">
-              <p className="text-lg font-bold">Leave Type:</p>
-              <p className="font-medium">{leave.leaveType}</p>
-            </div>
-
-            <div className="flex space-x-3 mb-2">
-              <p className="text-lg font-bold">Reason:</p>
-              <p className="font-medium">{leave.reason}</p>
-            </div>
-
-            <div className="flex space-x-3 mb-2">
-              <p className="text-lg font-bold">Department:</p>
-              <p className="font-medium">{leave.employeeId.department.dep_name}</p>
-            </div>
-
-            <div className="flex space-x-3 mb-2">
-              <p className="text-lg font-bold">Start Date:</p>
-              <p className="font-medium">
-                {new Date(leave.startDate).toLocaleDateString()}
-              </p>
-            </div>
-
-            <div className="flex space-x-3 mb-2">
-              <p className="text-lg font-bold">End Date:</p>
-              <p className="font-medium">
-                {new Date(leave.endDate).toLocaleDateString()}
-              </p>
-            </div>
-
-            {/* Status or Action */}
-            <div className="flex space-x-3 mb-2">
-              <p className="text-lg font-bold">
-                {leave.status === "Pending" ? "Action:" : "Status:"}
-              </p>
-
-              {leave.status === "Pending" ? (
-                <div className="flex space-x-2">
-                  <button
-                    className="px-3 py-1 bg-teal-300 hover:bg-teal-400 rounded"
-                    onClick={() => changeStatus(leave._id, "Approved")}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    className="px-3 py-1 bg-red-300 hover:bg-red-400 rounded"
-                    onClick={() => changeStatus(leave._id, "Rejected")}
-                  >
-                    Reject
-                  </button>
-                </div>
-              ) : (
-                <p className="font-medium">{leave.status}</p>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
+
+// --------------------------
+// Reusable row component
+// --------------------------
+const DetailRow = ({ label, value }) => (
+  <div className="flex justify-between border-b py-1">
+    <span className="font-semibold">{label}:</span>
+    <span>{value}</span>
+  </div>
+);
 
 export default Detail;

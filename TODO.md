@@ -1,0 +1,1 @@
+- [ ] Update Sidebar.jsx to handle loading state from useAuth hook by showing a loading indicator while authentication is being verified.
