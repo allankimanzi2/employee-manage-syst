@@ -31,7 +31,7 @@ const EditDepartment = () => {
     };
 
     fetchDepartment();
-  }, []);
+  }, []);cd 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
