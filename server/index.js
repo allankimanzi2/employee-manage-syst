@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-dotenv.config(); // Load environment variables first
+dotenv.config();
 
 import authRouter from './routes/auth.js';
 import departmentRouter from './routes/department.js';
@@ -23,9 +23,8 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", // Vite development
-      "http://localhost:3000", // Optional (if using another dev server)
-      "https://your-vercel-app.vercel.app" // Replace with your Vercel frontend URL
+      "http://localhost:5173",               // Local Vite development
+      "https://employee-manage-syst.vercel.app" // Production frontend
     ],
     credentials: true,
   })
@@ -38,10 +37,8 @@ app.use(express.static('public/uploads'));
 // Routes
 // ====================
 
-// Health/Test route
 app.use('/api/test', testRouter);
 
-// API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/department', departmentRouter);
 app.use('/api/employee', employeeRouter);
@@ -53,11 +50,13 @@ app.use('/api/dashboard', dashboardRouter);
 // ====================
 // Debug
 // ====================
+
 console.log("JWT_KEY loaded:", process.env.JWT_KEY ? "✅ Yes" : "❌ No");
 
 // ====================
 // Start Server
 // ====================
+
 const PORT = process.env.PORT || 5000;
 
 connectToDatabase()
