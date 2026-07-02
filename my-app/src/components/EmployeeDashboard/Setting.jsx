@@ -1,6 +1,6 @@
 //src/components/forms/DepartmentForms.js
 import React, { useState } from "react";
-import axios from "axios";
+import API from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -26,15 +26,14 @@ const Setting = () => {
             setError("Password not matched");
         } else {
             try {
-                const response = await axios.put(
-                    "http://localhost:5000/api/setting/change-password",
+                const response = await API.put("/setting/change-password", formData);
                     setting,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("token")}`,
                         },
                     }
-                );
+                ;
                 if (response.data.success) {
                     navigate("/admin-dashboard/employees");
                     setError("")

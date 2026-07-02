@@ -9,7 +9,7 @@ import {
     FaTimesCircle,
     FaUsers,
 } from "react-icons/fa";
-import axios from "axios";
+import API from "../../utils/api";
 
 const AdminSummary = () => {
     const [summary, setSummary] = useState(null);
@@ -17,7 +17,7 @@ const AdminSummary = () => {
     useEffect(() => {
         const fetchSummary = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/api/dashboard/summary", {
+                const response = await API.get("/dashboard/summary");
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,
                     },

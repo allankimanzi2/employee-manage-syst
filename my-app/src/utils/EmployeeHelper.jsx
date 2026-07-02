@@ -1,7 +1,9 @@
-import axios from "axios";
+import API from "./api";
 import { useNavigate } from "react-router-dom";
 
-// ✅ Columns configuration for DataTable
+// ==============================
+// DataTable Columns
+// ==============================
 export const columns = [
   {
     name: "S No",
@@ -12,7 +14,7 @@ export const columns = [
     name: "Name",
     selector: (row) => row.name,
     sortable: true,
-    width: "100px",
+    width: "120px",
   },
   {
     name: "Image",
@@ -22,7 +24,7 @@ export const columns = [
   {
     name: "Department",
     selector: (row) => row.dep_name,
-    width: "120px",
+    width: "150px",
   },
   {
     name: "DOB",
@@ -37,54 +39,55 @@ export const columns = [
   },
 ];
 
-// ✅ Fetch all departments with proper error handling
+// ==============================
+// Fetch Departments
+// ==============================
 export const fetchDepartments = async () => {
   try {
-    const response = await axios.get("http://localhost:5000/department", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    const response = await API.get("/department");
 
     if (response.data.success) {
       return response.data.departments;
-    } else {
-      console.error("Failed to fetch departments:", response.data.error);
-      return [];
     }
+
+    console.error(response.data.error);
+    return [];
   } catch (error) {
-    console.error("Error fetching departments:", error);
-    alert(error.response?.data?.error || "Network error while fetching departments");
+    console.error(error);
+    alert(
+      error.response?.data?.error ||
+        "Failed to fetch departments."
+    );
     return [];
   }
 };
 
-// ✅ Fetch employees by department ID with error handling
+// ==============================
+// Fetch Employees by Department
+// ==============================
 export const getEmployees = async (id) => {
   try {
-    const response = await axios.get(
-      `http://localhost:5000/api/employee/department/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
+    const response = await API.get(`/employee/department/${id}`);
 
     if (response.data.success) {
       return response.data.employees;
-    } else {
-      console.error("Failed to fetch employees:", response.data.error);
-      return [];
     }
+
+    console.error(response.data.error);
+    return [];
   } catch (error) {
-    console.error("Error fetching employees:", error);
-    alert(error.response?.data?.error || "Network error while fetching employees");
+    console.error(error);
+    alert(
+      error.response?.data?.error ||
+        "Failed to fetch employees."
+    );
     return [];
   }
 };
 
-// ✅ Employee action buttons component
+// ==============================
+// Employee Action Buttons
+// ==============================
 export const EmployeeButtons = ({ Id }) => {
   const navigate = useNavigate();
 
@@ -96,18 +99,21 @@ export const EmployeeButtons = ({ Id }) => {
       >
         View
       </button>
+
       <button
         className="px-3 py-1 bg-blue-600 text-white rounded"
         onClick={() => navigate(`/admin-dashboard/employees/edit/${Id}`)}
       >
         Edit
       </button>
+
       <button
         className="px-3 py-1 bg-yellow-600 text-white rounded"
         onClick={() => navigate(`/admin-dashboard/employees/salary/${Id}`)}
       >
         Salary
       </button>
+
       <button
         className="px-3 py-1 bg-red-600 text-white rounded"
         onClick={() => navigate(`/admin-dashboard/employees/leaves/${Id}`)}
@@ -117,4 +123,3 @@ export const EmployeeButtons = ({ Id }) => {
     </div>
   );
 };
-

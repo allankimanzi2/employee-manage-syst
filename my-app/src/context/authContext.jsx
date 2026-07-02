@@ -1,7 +1,7 @@
 // authContext.jsx
 // src/context/authContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import API from "../utils/api";
 
 const userContext = createContext();
 
@@ -14,9 +14,7 @@ const AuthProvider = ({ children }) => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const response = await axios.get('http://localhost:5000/api/auth/verify', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const response = await API.get("/auth/verify");
           if (response.data.success) setUser(response.data.user);
         } else {
           setUser(null);

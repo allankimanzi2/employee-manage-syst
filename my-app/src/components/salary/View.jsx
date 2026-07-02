@@ -1,27 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import API from "../../utils/api";
 import { useAuth } from "../../context/authContext";
 
 const View = () => {
-  const [salaries, setSalaries] = useState(null);
-  const [filteredSalaries, setFilteredSalaries] = useState(null);
+  const [salaries, setSalaries] = useState([]);
+  const [filteredSalaries, setFilteredSalaries] = useState([]);
   const [error, setError] = useState(null);
 
   const { id } = useParams();
   const { user } = useAuth();
-  let sno = 1;
 
   const fetchSalaries = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/salary/${id}/${user.role}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const response = await API.get(`/salary/${id}/${user.role}`);
 
       if (response.data.success) {
         setSalaries(response.data.salary);
@@ -31,35 +23,31 @@ const View = () => {
       }
     } catch (err) {
       console.error(err);
-      if (err.response) {
-        setError(err.response.data.error || "Server responded with an error.");
-      } else {
-        setError("Network error. Please try again.");
-      }
+      setError(
+        err.response?.data?.error || "Network error. Please try again."
+      );
     }
   };
 
   useEffect(() => {
-    fetchSalaries();
-  }, []);
+    if (user) {
+      fetchSalaries();
+    }
+  }, [user]);
 
-  // Fix filter spelling and logic
   const filterSalaries = (e) => {
-    const q = e.target.value;
+    const q = e.target.value.toLowerCase();
 
-    if (!salaries) return;
-
-    const filteredRecords = salaries.filter((salary) =>
-      salary.employeeId.employeeId
-        .toLowerCase()
-        .includes(q.toLowerCase())
+    const filtered = salaries.filter((salary) =>
+      salary.employeeId.employeeId.toLowerCase().includes(q)
     );
 
-    setFilteredSalaries(filteredRecords);
+    setFilteredSalaries(filtered);
   };
 
-  if (filteredSalaries === null)
+  if (!user) {
     return <div className="text-center mt-10">Loading...</div>;
+  }
 
   return (
     <div className="overflow-x-auto p-5">
@@ -68,14 +56,16 @@ const View = () => {
       </div>
 
       {error && (
-        <p className="text-red-600 text-center my-3 font-semibold">{error}</p>
+        <p className="text-red-600 text-center my-3 font-semibold">
+          {error}
+        </p>
       )}
 
       <div className="flex justify-end my-3">
         <input
           type="text"
           placeholder="Search By Emp ID"
-          className="border px-2 rounded-md py-0.5 border-gray-300"
+          className="border px-2 rounded-md py-1 border-gray-300"
           onChange={filterSalaries}
         />
       </div>
@@ -86,26 +76,36 @@ const View = () => {
             <tr>
               <th className="px-6 py-3">SNO</th>
               <th className="px-6 py-3">Emp ID</th>
-              <th className="px-6 py-3">Salary</th>
+              <th className="px-6 py-3">Basic Salary</th>
               <th className="px-6 py-3">Allowance</th>
               <th className="px-6 py-3">Deduction</th>
-              <th className="px-6 py-3">Total</th>
+              <th className="px-6 py-3">Net Salary</th>
               <th className="px-6 py-3">Pay Date</th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredSalaries.map((salary) => (
+            {filteredSalaries.map((salary, index) => (
               <tr
                 key={salary._id}
-                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                className="bg-white border-b"
               >
-                <td className="px-6 py-3">{sno++}</td>
-                <td className="px-6 py-3">{salary.employeeId.employeeId}</td>
-                <td className="px-6 py-3">{salary.basicSalary}</td>
-                <td className="px-6 py-3">{salary.allowances}</td>
-                <td className="px-6 py-3">{salary.deductions}</td>
-                <td className="px-6 py-3">{salary.netSalary}</td>
+                <td className="px-6 py-3">{index + 1}</td>
+                <td className="px-6 py-3">
+                  {salary.employeeId.employeeId}
+                </td>
+                <td className="px-6 py-3">
+                  {salary.basicSalary}
+                </td>
+                <td className="px-6 py-3">
+                  {salary.allowances}
+                </td>
+                <td className="px-6 py-3">
+                  {salary.deductions}
+                </td>
+                <td className="px-6 py-3">
+                  {salary.netSalary}
+                </td>
                 <td className="px-6 py-3">
                   {new Date(salary.payDate).toLocaleDateString()}
                 </td>
@@ -114,7 +114,7 @@ const View = () => {
           </tbody>
         </table>
       ) : (
-        <div>No Records Found</div>
+        <div className="text-center mt-5">No Records Found</div>
       )}
     </div>
   );

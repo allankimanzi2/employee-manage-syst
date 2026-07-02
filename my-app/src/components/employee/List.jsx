@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { EmployeeButtons } from "../../utils/EmployeeHelper";
 import DataTable from "react-data-table-component";
-import axios from "axios";
-
+import API from "../../utils/api";
 const List = () => {
   const [employees, setEmployees] = useState([]);
   const [empLoading, setEmpLoading] = useState(false);
@@ -34,7 +33,7 @@ const List = () => {
                 width={40}
                 height={40}
                 className="rounded-full object-cover border border-gray-300"
-                src={`http://localhost:5000/${emp.userId.profileImage}`}
+                src={`https://employee-manage-syst.onrender.com/${employee.userId.profileImage}`}
                 alt="profile"
               />
             ),

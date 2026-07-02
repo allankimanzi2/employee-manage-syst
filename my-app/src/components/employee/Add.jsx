@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchDepartments } from '../../utils/EmployeeHelper';
-import axios from 'axios';
+import API from "../../utils/api";
 
 const Add = () => {
   const [departments, setDepartments] = useState([]);
@@ -41,8 +41,8 @@ const Add = () => {
     });
 
     try {
-      const response = await axios.post(
-        'http://localhost:5000/api/employee/add',
+      const response = API.post(
+        '/employee/add',
         formDataObj,
         {
           headers: {
