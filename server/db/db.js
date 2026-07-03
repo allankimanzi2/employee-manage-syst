@@ -10,10 +10,7 @@ const connectToDatabase = async () => {
       throw new Error("MONGODB_URL is undefined. Check your .env file.");
     }
 
-    await mongoose.connect(process.env.MONGODB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGODB_URL);
 
     console.log('✅ Connected to MongoDB Atlas via Mongoose');
   } catch (error) {
