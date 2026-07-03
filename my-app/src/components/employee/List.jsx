@@ -12,7 +12,7 @@ const List = () => {
     const fetchEmployees = async () => {
       setEmpLoading(true);
       try {
-        const response = await axios.get("http://localhost:5000/employee", {
+        const response = await axios.get("https://employee-manage-syst.onrender.com/api/employee")
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },

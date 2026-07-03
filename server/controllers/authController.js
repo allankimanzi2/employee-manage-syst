@@ -1,32 +1,53 @@
-import User from '../models/User.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import User from "../models/User.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const login = async (req, res) => {
   try {
+    console.log("========== LOGIN REQUEST ==========");
+    console.log("Body:", req.body);
+
+    const users = await User.find({}, "name email role");
+    console.log("Users in database:", users);
+
     const { email, password } = req.body;
 
-    // Find user
     const user = await User.findOne({ email });
+
     if (!user) {
-      return res.status(404).json({ success: false, error: "User Not Found" });
+      console.log("User not found:", email);
+      return res.status(404).json({
+        success: false,
+        error: "User Not Found",
+      });
     }
 
-    // Validate password
+    console.log("User found:", user.email);
+
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
-      return res.status(401).json({ success: false, error: "Invalid Password" });
+      console.log("Password incorrect");
+      return res.status(401).json({
+        success: false,
+        error: "Invalid Password",
+      });
     }
 
-    // Create JWT
     const token = jwt.sign(
-      { _id: user._id, role: user.role },
+      {
+        _id: user._id,
+        role: user.role,
+      },
       process.env.JWT_KEY,
-      { expiresIn: "10d" }
+      {
+        expiresIn: "10d",
+      }
     );
 
-    // Send response
-    res.status(200).json({
+    console.log("Login successful");
+
+    return res.status(200).json({
       success: true,
       token,
       user: {
@@ -36,15 +57,21 @@ const login = async (req, res) => {
         role: user.role,
       },
     });
-
   } catch (error) {
-    console.error("LOGIN ERROR:", error.message);
-    res.status(500).json({ success: false, error: error.message });
+    console.error("LOGIN ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 
 const verify = (req, res) => {
-  res.status(200).json({ success: true, user: req.user });
+  return res.status(200).json({
+    success: true,
+    user: req.user,
+  });
 };
 
 export { login, verify };
