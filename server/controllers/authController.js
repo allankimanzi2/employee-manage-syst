@@ -4,36 +4,44 @@ import jwt from "jsonwebtoken";
 
 const login = async (req, res) => {
   try {
-    console.log("========== LOGIN REQUEST ==========");
-    console.log("Body:", req.body);
-
-    const users = await User.find({}, "name email role");
-    console.log("Users in database:", users);
+    console.log("\n========== LOGIN REQUEST ==========");
+    console.log("Request Body:", req.body);
 
     const { email, password } = req.body;
 
+    // Show all users currently in the database
+    const users = await User.find({}, "name email role");
+    console.log("Users in database:", users);
+
+    // Find the requested user
     const user = await User.findOne({ email });
 
     if (!user) {
-      console.log("User not found:", email);
+      console.log(`❌ User not found: ${email}`);
+
       return res.status(404).json({
         success: false,
         error: "User Not Found",
       });
     }
 
-    console.log("User found:", user.email);
+    console.log(`✅ User found: ${user.email}`);
 
+    // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      console.log("Password incorrect");
+      console.log("❌ Invalid password");
+
       return res.status(401).json({
         success: false,
         error: "Invalid Password",
       });
     }
 
+    console.log("✅ Password matched");
+
+    // Generate JWT
     const token = jwt.sign(
       {
         _id: user._id,
@@ -45,7 +53,7 @@ const login = async (req, res) => {
       }
     );
 
-    console.log("Login successful");
+    console.log("✅ Login successful");
 
     return res.status(200).json({
       success: true,
@@ -58,7 +66,7 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("LOGIN ERROR:", error);
+    console.error("❌ LOGIN ERROR:", error);
 
     return res.status(500).json({
       success: false,
