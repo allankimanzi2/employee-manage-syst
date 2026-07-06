@@ -52,6 +52,7 @@ app.use('/api/dashboard', dashboardRouter);
 // ====================
 
 console.log("JWT_KEY loaded:", process.env.JWT_KEY ? "✅ Yes" : "❌ No");
+console.log("Mongo URL:", process.env.MONGODB_URL);
 
 // ====================
 // Start Server
