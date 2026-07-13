@@ -41,7 +41,7 @@ const List = () => {
                 className="rounded-full object-cover border border-gray-300"
                 src={
                   emp.userId?.profileImage
-                    ? `https://employee-manage-syst.onrender.com/${emp.userId.profileImage}`
+                    ? `https://employee-manage-syst.onrender.com/uploads/${emp.userId.profileImage}`
                     : "https://via.placeholder.com/40"
                 }
                 alt="profile"

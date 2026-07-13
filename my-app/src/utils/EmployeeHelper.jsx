@@ -44,19 +44,13 @@ export const columns = [
 // Fetch All Departments
 // =====================================
 export const fetchDepartments = async () => {
-  try {
-    const { data } = await API.get("/department");
+  const response = await API.get("/department");
 
-    if (data.success) {
-      return data.departments;
-    }
-
-    return [];
-  } catch (err) {
-    console.error("Department Error:", err);
-
-    return [];
+  if (response.data.success) {
+    return response.data.departments;
   }
+
+  return [];
 };
 
 // =====================================

@@ -192,23 +192,35 @@ const Add = () => {
           </div>
 
           <div>
-            <label>Department</label>
-            <select
-              name="department"
-              className="border p-2 w-full rounded"
-              value={formData.department}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Department</option>
+  <label>Department</label>
 
-              {departments.map((dep) => (
-                <option key={dep._id} value={dep._id}>
-                  {dep.dep_name}
-                </option>
-              ))}
-            </select>
-          </div>
+  <p className="text-sm text-red-600 mb-2">
+    Departments loaded: {departments.length}
+  </p>
+
+  <select
+    name="department"
+    className="border p-2 w-full rounded"
+    value={formData.department}
+    onChange={handleChange}
+    required
+  >
+    <option value="">Select Department</option>
+
+    {departments.map((dep) => {
+      console.log("Rendering:", dep);
+
+      return (
+        <option
+          key={dep._id}
+          value={dep._id}
+        >
+          {dep.dep_name}
+        </option>
+      );
+    })}
+  </select>
+</div>
 
           <div>
             <label>Salary</label>
