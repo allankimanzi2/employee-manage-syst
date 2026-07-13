@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { EmployeeButtons } from "../../utils/EmployeeHelper";
 import DataTable from "react-data-table-component";
 import API from "../../utils/api";
+
 const List = () => {
   const [employees, setEmployees] = useState([]);
   const [empLoading, setEmpLoading] = useState(false);
@@ -11,32 +12,42 @@ const List = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       setEmpLoading(true);
+
       try {
-        const response = await axios.get("https://employee-manage-syst.onrender.com/api/employee")
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        // Using the shared API instance (JWT is attached automatically)
+        const response = await API.get("/employee");
 
         console.log(response.data);
 
         if (response.data.success) {
           let sno = 1;
+
           const data = response.data.employees.map((emp) => ({
             id: emp._id,
             sno: sno++,
-            dep_name: emp.department.dep_name,
-            name: emp.userId.name,
-            dob: new Date(emp.dob).toLocaleDateString(),
+
+            dep_name: emp.department?.dep_name || "N/A",
+
+            name: emp.userId?.name || "N/A",
+
+            dob: emp.dob
+              ? new Date(emp.dob).toLocaleDateString()
+              : "N/A",
+
             profileImage: (
               <img
                 width={40}
                 height={40}
                 className="rounded-full object-cover border border-gray-300"
-                src={`https://employee-manage-syst.onrender.com/${employee.userId.profileImage}`}
+                src={
+                  emp.userId?.profileImage
+                    ? `https://employee-manage-syst.onrender.com/${emp.userId.profileImage}`
+                    : "https://via.placeholder.com/40"
+                }
                 alt="profile"
               />
             ),
+
             action: <EmployeeButtons Id={emp._id} />,
           }));
 
@@ -45,7 +56,8 @@ const List = () => {
         }
       } catch (error) {
         console.error(error);
-        if (error.response && !error.response.data.success) {
+
+        if (error.response) {
           alert(error.response.data.error);
         }
       } finally {
@@ -56,23 +68,22 @@ const List = () => {
     fetchEmployees();
   }, []);
 
-  // ✅ Define table columns here
   const columns = [
     {
-      name: "S No",
+      name: "S/N",
       selector: (row) => row.sno,
       sortable: true,
       width: "80px",
     },
     {
-      name: "Name",
-      selector: (row) => row.name,
-      sortable: true,
+      name: "Profile",
+      cell: (row) => row.profileImage,
+      width: "100px",
     },
     {
-      name: "Image",
-      selector: (row) => row.profileImage,
-      width: "100px",
+      name: "Employee",
+      selector: (row) => row.name,
+      sortable: true,
     },
     {
       name: "Department",
@@ -80,60 +91,60 @@ const List = () => {
       sortable: true,
     },
     {
-      name: "DOB",
+      name: "Date of Birth",
       selector: (row) => row.dob,
     },
     {
       name: "Action",
-      selector: (row) => row.action,
-      width: "250px",
+      cell: (row) => row.action,
+      width: "220px",
     },
   ];
 
-  // ✅ Handle search
   const handleFilter = (e) => {
     const value = e.target.value.toLowerCase();
+
     const records = employees.filter((emp) =>
       emp.dep_name.toLowerCase().includes(value)
     );
+
     setFilteredEmployees(records);
   };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h3 className="text-2xl font-bold text-gray-700">Manage Employee</h3>
-      </div>
 
-      {/* Controls */}
-      <div className="flex justify-between items-center my-4">
-        <input
-          type="text"
-          placeholder="Search By Department"
-          className="px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-          onChange={handleFilter}
-        />
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">
+          Employees
+        </h2>
+
         <Link
           to="/admin-dashboard/add-employee"
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md shadow-md transition"
+          className="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
         >
-          Add New Employee
+          + Add Employee
         </Link>
       </div>
 
-      {/* Data Table */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <DataTable
-          columns={columns}
-          data={filteredEmployee}
-          progressPending={empLoading}
-          pagination
-          highlightOnHover
-          responsive
-          striped
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search department..."
+          onChange={handleFilter}
+          className="w-80 px-4 py-2 border rounded-lg"
         />
       </div>
+
+      <DataTable
+        columns={columns}
+        data={filteredEmployee}
+        progressPending={empLoading}
+        pagination
+        striped
+        highlightOnHover
+        responsive
+      />
     </div>
   );
 };

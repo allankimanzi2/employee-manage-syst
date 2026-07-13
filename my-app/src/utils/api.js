@@ -2,12 +2,13 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: "https://employee-manage-syst.onrender.com/api",
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Automatically attach token
+// Attach JWT automatically
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -19,6 +20,23 @@ API.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Handle expired tokens globally
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+
+    return Promise.reject(error);
+  }
 );
 
 export default API;

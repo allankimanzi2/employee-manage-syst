@@ -44,7 +44,7 @@ export const columns = [
 // ==============================
 export const fetchDepartments = async () => {
   try {
-    const response = await API.get("/department");
+    const response = await API.get("/department/add");
 
     if (response.data.success) {
       return response.data.departments;

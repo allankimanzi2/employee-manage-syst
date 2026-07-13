@@ -70,7 +70,7 @@ const Add = () => {
     setError(null);
 
     try {
-      const response = await API.post("/salary/add", salary);
+      const response = await API.post("/salary", salary);
 
       if (response.data.success) {
         navigate("/admin-dashboard/employees");
