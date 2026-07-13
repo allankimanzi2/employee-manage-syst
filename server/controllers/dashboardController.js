@@ -2,26 +2,33 @@ import Department from "../models/Department.js";
 import Employee from "../models/Employee.js";
 import Leave from "../models/Leave.js";
 
-// ✅ Get dashboard summary
 const getSummary = async (req, res) => {
   try {
-    // Total employees
+    // ==========================
+    // Summary Cards
+    // ==========================
+
     const totalEmployees = await Employee.countDocuments();
 
-    // Total departments
     const totalDepartments = await Department.countDocuments();
 
-    // Total salaries
-    const totalSalariesResult = await Employee.aggregate([
-      { $group: { _id: null, totalSalary: { $sum: "$salary" } } },
+    const salaryResult = await Employee.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalSalary: { $sum: "$salary" },
+        },
+      },
     ]);
 
-    const totalSalary = totalSalariesResult[0]?.totalSalary || 0;
+    const monthlyPayroll = salaryResult[0]?.totalSalary || 0;
 
-    // Employees who applied for leave
-    const employeeAppliedForLeave = await Leave.distinct("employeeId");
+    // ==========================
+    // Leave Summary
+    // ==========================
 
-    // Leave counts by status
+    const employeesApplied = await Leave.distinct("employeeId");
+
     const leaveStatus = await Leave.aggregate([
       {
         $group: {
@@ -32,24 +39,127 @@ const getSummary = async (req, res) => {
     ]);
 
     const leaveSummary = {
-      appliedFor: employeeAppliedForLeave.length,
-      approved: leaveStatus.find((item) => item._id === "Approved")?.count || 0,
-      rejected: leaveStatus.find((item) => item._id === "Rejected")?.count || 0,
-      pending: leaveStatus.find((item) => item._id === "Pending")?.count || 0,
+      applied: employeesApplied.length,
+      approved:
+        leaveStatus.find((l) => l._id === "Approved")?.count || 0,
+      pending:
+        leaveStatus.find((l) => l._id === "Pending")?.count || 0,
+      rejected:
+        leaveStatus.find((l) => l._id === "Rejected")?.count || 0,
     };
+
+    // ==========================
+    // Recent Employees
+    // ==========================
+
+    const recentEmployees = await Employee.find()
+      .populate("userId", "name email")
+      .populate("department", "dep_name")
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    // ==========================
+    // Recent Leave Requests
+    // ==========================
+
+    const recentLeaves = await Leave.find()
+      .populate({
+        path: "employeeId",
+        populate: {
+          path: "userId",
+          select: "name",
+        },
+      })
+      .sort({ appliedAt: -1 })
+      .limit(5);
+
+    // ==========================
+    // Department Distribution
+    // ==========================
+
+    const departmentDistribution = await Employee.aggregate([
+      {
+        $group: {
+          _id: "$department",
+          employees: { $sum: 1 },
+        },
+      },
+      {
+        $lookup: {
+          from: "departments",
+          localField: "_id",
+          foreignField: "_id",
+          as: "department",
+        },
+      },
+      {
+        $unwind: "$department",
+      },
+      {
+        $project: {
+          department: "$department.dep_name",
+          employees: 1,
+        },
+      },
+    ]);
+
+    // ==========================
+    // Employee Growth (Last 6 Months)
+    // ==========================
+
+    const employeeGrowth = await Employee.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          employees: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1,
+        },
+      },
+      {
+        $limit: 6,
+      },
+    ]);
+
+    // ==========================
+    // Response
+    // ==========================
 
     return res.status(200).json({
       success: true,
-      totalEmployees,
-      totalDepartments,
-      totalSalary,
+
+      summary: {
+        totalEmployees,
+        totalDepartments,
+        monthlyPayroll,
+      },
+
       leaveSummary,
+
+      recentEmployees,
+
+      recentLeaves,
+
+      departmentDistribution,
+
+      employeeGrowth,
     });
   } catch (error) {
-    console.error("Dashboard summary error:", error);
-    return res
-      .status(500)
-      .json({ success: false, error: "Failed to fetch dashboard summary" });
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 };
 

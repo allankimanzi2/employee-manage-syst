@@ -14,7 +14,7 @@ export const columns = [
     name: "Name",
     selector: (row) => row.name,
     sortable: true,
-    width: "120px",
+    width: "150px",
   },
   {
     name: "Image",
@@ -24,7 +24,8 @@ export const columns = [
   {
     name: "Department",
     selector: (row) => row.dep_name,
-    width: "150px",
+    sortable: true,
+    width: "160px",
   },
   {
     name: "DOB",
@@ -39,84 +40,86 @@ export const columns = [
   },
 ];
 
-// ==============================
-// Fetch Departments
-// ==============================
+// =====================================
+// Fetch All Departments
+// =====================================
 export const fetchDepartments = async () => {
   try {
-    const response = await API.get("/department/add");
+    const { data } = await API.get("/department");
 
-    if (response.data.success) {
-      return response.data.departments;
+    if (data.success) {
+      return data.departments;
     }
 
-    console.error(response.data.error);
     return [];
-  } catch (error) {
-    console.error(error);
-    alert(
-      error.response?.data?.error ||
-        "Failed to fetch departments."
-    );
+  } catch (err) {
+    console.error("Department Error:", err);
+
     return [];
   }
 };
 
-// ==============================
-// Fetch Employees by Department
-// ==============================
-export const getEmployees = async (id) => {
+// =====================================
+// Fetch Employees By Department
+// =====================================
+export const getEmployees = async (departmentId) => {
   try {
-    const response = await API.get(`/employee/department/${id}`);
+    const { data } = await API.get(
+      `/employee/department/${departmentId}`
+    );
 
-    if (response.data.success) {
-      return response.data.employees;
+    if (data.success) {
+      return data.employees;
     }
 
-    console.error(response.data.error);
     return [];
-  } catch (error) {
-    console.error(error);
-    alert(
-      error.response?.data?.error ||
-        "Failed to fetch employees."
-    );
+  } catch (err) {
+    console.error("Employee Error:", err);
+
     return [];
   }
 };
 
-// ==============================
-// Employee Action Buttons
-// ==============================
+// =====================================
+// Action Buttons
+// =====================================
 export const EmployeeButtons = ({ Id }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex space-x-3">
+    <div className="flex gap-2">
       <button
-        className="px-3 py-1 bg-teal-600 text-white rounded"
-        onClick={() => navigate(`/admin-dashboard/employees/${Id}`)}
+        className="bg-teal-600 text-white px-3 py-1 rounded"
+        onClick={() =>
+          navigate(`/admin-dashboard/employees/${Id}`)
+        }
       >
         View
       </button>
 
       <button
-        className="px-3 py-1 bg-blue-600 text-white rounded"
-        onClick={() => navigate(`/admin-dashboard/employees/edit/${Id}`)}
+        className="bg-blue-600 text-white px-3 py-1 rounded"
+        onClick={() =>
+          navigate(`/admin-dashboard/employees/${Id}/edit`)
+        }
       >
         Edit
       </button>
 
       <button
-        className="px-3 py-1 bg-yellow-600 text-white rounded"
-        onClick={() => navigate(`/admin-dashboard/employees/salary/${Id}`)}
+        className="bg-yellow-600 text-white px-3 py-1 rounded"
+        onClick={() =>
+          navigate(`/admin-dashboard/employees/salary/${Id}`)
+        }
       >
         Salary
       </button>
 
       <button
-        className="px-3 py-1 bg-red-600 text-white rounded"
-        onClick={() => navigate(`/admin-dashboard/employees/leaves/${Id}`)}
+        className="bg-red-600 text-white px-3 py-1 rounded"
+        onClick={() =>
+          navigate(`/admin-dashboard/employees/leave/${Id}`)
+        }
       >
         Leave
       </button>
