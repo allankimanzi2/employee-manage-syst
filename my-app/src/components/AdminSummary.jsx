@@ -1,5 +1,6 @@
 import React from 'react';
 import SummaryCard from './SummaryCard';
+import WorkforceOverview from './dashboard/WorkforceOverview';
 import {
   FaBuilding,
   FaFileAlt,
@@ -66,6 +67,9 @@ const AdminSummary = () => {
             color="bg-red-600"
           />
         </div>
+      </div>
+      <div className="mt-12">
+        <WorkforceOverview />
       </div>
     </div>
   );

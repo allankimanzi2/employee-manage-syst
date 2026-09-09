@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from "./pages/Login";
+import AdminAttendance from './components/attendance/Attendance';
 import AdminDashboard from './pages/AdminDashboard';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import PrivateRoutes from './utils/PrivateRoutes';
@@ -18,8 +19,11 @@ import View from './components/employee/View';
 import Edit from './components/employee/Edit';
 import AddSalary from './components/salary/Add';
 import ViewSalary from './components/salary/View';
+import Payslip from "./components/salary/Payslip";
+import PayrollReports from "./components/reports/PayrollReports";
 
 // Employee Components
+import EmployeeAttendance from "./components/EmployeeDashboard/Attendance";
 import Summary from './components/EmployeeDashboard/Summary';
 import LeaveList from './components/leave/List';
 import AddLeave from './components/leave/Add';
@@ -53,12 +57,30 @@ function App() {
           <Route path="employees/:id" element={<View />} />
           <Route path="employees/:id/edit" element={<Edit />} />
           <Route path="employees/salary/:id" element={<ViewSalary />} />
-          <Route path="salary/add" element={<AddSalary />} />
+<Route path="salary/add" element={<AddSalary />} />
+
+<Route
+  path="reports"
+  element={<PayrollReports />}
+/>
+
+<Route
+  path="employees/salary/:employeeId/payslip/:salaryId"
+  element={<Payslip />}
+/>
+
+<Route
+  path="payroll-reports"
+  element={<Navigate to="/admin-dashboard/reports" replace />}
+/>
+          
 
           {/* ✔ Corrected Leave Route */}
           <Route path="leaves" element={<Table />} />
           <Route path="leaves/:id" element={<Detail />} />
           <Route path="employees/leave/:id" element={<LeaveList />} />
+          {/* Attendance */}
+          <Route path="attendance" element={<AdminAttendance />} />
 
           <Route path="settings" element={<SettingsPage />} />
         </Route>
@@ -76,10 +98,13 @@ function App() {
         >
           <Route index element={<Summary />} />
           <Route path="profile/:id" element={<View />} />
+          <Route path="attendance" element={<EmployeeAttendance />} />
+          <Route path="leaves" element={<LeaveList />} />
           <Route path="leaves/:id" element={<LeaveList />} />
           <Route path="add-leave" element={<AddLeave />} />
           <Route path="salary/:id" element={<ViewSalary />} />
           <Route path="settings" element={<SettingsPage />} />
+          
         </Route>
 
         {/* Fallback */}

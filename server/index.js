@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import authRouter from './routes/auth.js';
+import attendanceRouter from './routes/attendance.js';
 import departmentRouter from './routes/department.js';
 import employeeRouter from './routes/employee.js';
 import salaryRouter from './routes/salary.js';
@@ -46,6 +47,7 @@ app.use('/api/salary', salaryRouter);
 app.use('/api/leave', leaveRouter);
 app.use('/api/setting', settingRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/attendance', attendanceRouter);
 
 // ====================
 // Debug

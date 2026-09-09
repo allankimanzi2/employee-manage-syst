@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { EmployeeButtons } from "../../utils/EmployeeHelper";
 import DataTable from "react-data-table-component";
 import API from "../../utils/api";
+import { FaUserCircle } from "react-icons/fa";
 
 const List = () => {
   const [employees, setEmployees] = useState([]);
@@ -34,19 +35,17 @@ const List = () => {
               ? new Date(emp.dob).toLocaleDateString()
               : "N/A",
 
-            profileImage: (
-              <img
-                width={40}
-                height={40}
-                className="rounded-full object-cover border border-gray-300"
-                src={
-                  emp.userId?.profileImage
-                    ? `https://employee-manage-syst.onrender.com/uploads/${emp.userId.profileImage}`
-                    : "https://via.placeholder.com/40"
-                }
-                alt="profile"
-              />
-            ),
+              profileImage: emp.userId?.profileImage ? (
+                <img
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover border border-gray-300"
+                  src={`https://employee-manage-syst.onrender.com/uploads/${emp.userId.profileImage}`}
+                  alt={emp.userId?.name || "Employee"}
+                />
+              ) : (
+                <FaUserCircle className="w-10 h-10 text-gray-400" />
+              ),
 
             action: <EmployeeButtons Id={emp._id} />,
           }));

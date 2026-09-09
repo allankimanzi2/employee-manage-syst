@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import API from "../../utils/api";
 import LeaveButton from "./LeaveButton";
@@ -7,113 +7,337 @@ import LeaveButton from "./LeaveButton";
 const List = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch leaves from API
   const fetchLeaves = async () => {
     try {
       setLoading(true);
-      const res = await API.get(`/leave/${id}/${user.role}`);
-      if (res.data.success) setLeaves(res.data.leaves);
+
+      const res = await API.get(
+        `/leave/${id}/${user.role}`
+      );
+
+      if (res.data.success) {
+        setLeaves(res.data.leaves);
+      }
     } catch (err) {
-      alert(err.response?.data?.error || "Failed to fetch leaves");
+      console.error("Fetch leaves error:", err);
+
+      alert(
+        err.response?.data?.error ||
+          "Failed to fetch leave requests"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (id && user?.role) fetchLeaves();
+    if (id && user?.role) {
+      fetchLeaves();
+    }
   }, [id, user?.role]);
 
-  // Update leave status
+  const calculateDays = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const difference =
+      end.getTime() - start.getTime();
+
+    return (
+      Math.floor(
+        difference / (1000 * 60 * 60 * 24)
+      ) + 1
+    );
+  };
+
   const changeStatus = async (leaveId, status) => {
     try {
-      const res = await API.put(`/leave/${leaveId}`, { status });
+      const res = await API.put(
+        `/leave/${leaveId}`,
+        { status }
+      );
+
       if (res.data.success) {
-        // Update the leaves array locally without refetching
         setLeaves((prev) =>
-          prev.map((l) =>
-            l._id === leaveId ? { ...l, status: status } : l
+          prev.map((leave) =>
+            leave._id === leaveId
+              ? {
+                  ...leave,
+                  status,
+                }
+              : leave
           )
         );
       }
     } catch (err) {
-      alert(err.response?.data?.error || "Failed to update leave status");
+      console.error("Update leave error:", err);
+
+      alert(
+        err.response?.data?.error ||
+          "Failed to update leave status"
+      );
     }
   };
 
-  // Callback when a new leave is added
-  const handleLeaveAdded = (newLeave) => {
-    setLeaves((prev) => [...prev, newLeave]);
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "Approved":
+        return "bg-emerald-100 text-emerald-700";
+
+      case "Rejected":
+        return "bg-red-100 text-red-700";
+
+      default:
+        return "bg-yellow-100 text-yellow-700";
+    }
   };
 
-  if (loading) return <div className="text-center mt-10">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <p className="text-slate-500">
+          Loading leave requests...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6">
-      {/* Add leave button for employees */}
-      {user.role === "employee" && (
-        <Link
-          to="/employee-dashboard/add-leave"
-          className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 mb-4 inline-block"
-        >
-          Add Leave
-        </Link>
-      )}
+    <div className="space-y-6">
 
-      {/* Leaves Table */}
-      <table className="w-full border text-left">
-        <thead className="bg-gray-100 text-gray-700">
-          <tr>
-            <th className="px-4 py-2">#</th>
-            <th className="px-4 py-2">Type</th>
-            <th className="px-4 py-2">From</th>
-            <th className="px-4 py-2">To</th>
-            <th className="px-4 py-2">Status</th>
-            {user.role === "admin" && <th className="px-4 py-2">Action</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {leaves.length === 0 ? (
-            <tr>
-              <td colSpan={user.role === "admin" ? 6 : 5} className="text-center py-4">
-                No leave requests found
-              </td>
-            </tr>
-          ) : (
-            leaves.map((l, i) => (
-              <tr
-                key={l._id}
-                className="border-b hover:bg-gray-50 cursor-pointer"
-              >
-                <td className="px-4 py-2">{i + 1}</td>
-                <td className="px-4 py-2">{l.leaveType}</td>
-                <td className="px-4 py-2">
-                  {new Date(l.startDate).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-2">
-                  {new Date(l.endDate).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-2">{l.status}</td>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800">
+            {user.role === "employee"
+              ? "My Leave"
+              : "Employee Leave"}
+          </h1>
+
+          <p className="text-slate-500 mt-2">
+            View and manage leave requests.
+          </p>
+        </div>
+
+        {user.role === "employee" && (
+          <Link
+            to="/employee-dashboard/add-leave"
+            className="inline-flex items-center justify-center px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold transition"
+          >
+            + Request Leave
+          </Link>
+        )}
+
+      </div>
+
+      {/* Summary */}
+{user.role === "employee" && (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+    {/* Total Requests */}
+    <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+      <p className="text-sm text-slate-500">
+        Total Requests
+      </p>
+
+      <p className="text-3xl font-bold text-slate-800 mt-2">
+        {leaves.length}
+      </p>
+    </div>
+
+    {/* Pending */}
+    <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+      <p className="text-sm text-slate-500">
+        Pending
+      </p>
+
+      <p className="text-3xl font-bold text-yellow-600 mt-2">
+        {
+          leaves.filter(
+            (leave) => leave.status === "Pending"
+          ).length
+        }
+      </p>
+    </div>
+
+    {/* Approved */}
+    <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+      <p className="text-sm text-slate-500">
+        Approved
+      </p>
+
+      <p className="text-3xl font-bold text-emerald-600 mt-2">
+        {
+          leaves.filter(
+            (leave) => leave.status === "Approved"
+          ).length
+        }
+      </p>
+    </div>
+
+  </div>
+)}
+
+      {/* Leave table */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+
+        <div className="overflow-x-auto">
+
+          <table className="w-full text-left">
+
+            <thead className="bg-slate-50 border-b border-slate-200">
+
+              <tr>
+
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600">
+                  #
+                </th>
+
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600">
+                  Leave Type
+                </th>
+
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600">
+                  From
+                </th>
+
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600">
+                  To
+                </th>
+
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600">
+                  Days
+                </th>
+
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600">
+                  Status
+                </th>
+
                 {user.role === "admin" && (
-                  <td className="px-4 py-2">
-                    <LeaveButton
-                      leaveId={l._id}
-                      status={l.status}
-                      onApprove={(id) => changeStatus(id, "Approved")}
-                      onReject={(id) => changeStatus(id, "Rejected")}
-                    />
-                  </td>
+                  <th className="px-6 py-4 text-sm font-semibold text-slate-600">
+                    Action
+                  </th>
                 )}
+
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+
+            </thead>
+
+            <tbody>
+
+              {leaves.length === 0 ? (
+
+                <tr>
+
+                  <td
+                    colSpan={
+                      user.role === "admin"
+                        ? 7
+                        : 6
+                    }
+                    className="px-6 py-12 text-center text-slate-500"
+                  >
+                    No leave requests found.
+                  </td>
+
+                </tr>
+
+              ) : (
+
+                leaves.map((leave, index) => (
+
+                  <tr
+                    key={leave._id}
+                    className="border-b border-slate-100 hover:bg-slate-50 transition"
+                  >
+
+                    <td className="px-6 py-4 text-slate-500">
+                      {index + 1}
+                    </td>
+
+                    <td className="px-6 py-4">
+
+                      <p className="font-medium text-slate-800">
+                        {leave.leaveType}
+                      </p>
+
+                    </td>
+
+                    <td className="px-6 py-4 text-slate-600">
+                      {new Date(
+                        leave.startDate
+                      ).toLocaleDateString()}
+                    </td>
+
+                    <td className="px-6 py-4 text-slate-600">
+                      {new Date(
+                        leave.endDate
+                      ).toLocaleDateString()}
+                    </td>
+
+                    <td className="px-6 py-4 text-slate-600">
+                      {calculateDays(
+                        leave.startDate,
+                        leave.endDate
+                      )}
+                    </td>
+
+                    <td className="px-6 py-4">
+
+                      <span
+                        className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(
+                          leave.status
+                        )}`}
+                      >
+                        {leave.status}
+                      </span>
+
+                    </td>
+
+                    {user.role === "admin" && (
+
+                      <td className="px-6 py-4">
+
+                        <LeaveButton
+                          leaveId={leave._id}
+                          status={leave.status}
+                          onApprove={(leaveId) =>
+                            changeStatus(
+                              leaveId,
+                              "Approved"
+                            )
+                          }
+                          onReject={(leaveId) =>
+                            changeStatus(
+                              leaveId,
+                              "Rejected"
+                            )
+                          }
+                        />
+
+                      </td>
+
+                    )}
+
+                  </tr>
+
+                ))
+
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
     </div>
   );
 };

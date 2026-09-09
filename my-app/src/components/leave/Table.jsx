@@ -27,10 +27,10 @@ const Table = () => {
           leaveType: leave.leaveType,
           department: leave.employeeId?.department?.dep_name || "N/A",
           days:
-            Math.ceil(
-              (new Date(leave.endDate) - new Date(leave.startDate)) /
-                (1000 * 60 * 60 * 24)
-            ) || 1,
+  Math.floor(
+    (new Date(leave.endDate) - new Date(leave.startDate)) /
+      (1000 * 60 * 60 * 24)
+  ) + 1,
           status: leave.status,
           action: (
             <LeaveButton

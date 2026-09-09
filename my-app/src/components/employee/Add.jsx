@@ -64,7 +64,7 @@ const Add = () => {
     try {
       console.log("Submitting employee...");
 
-      const response = await API.post("/employee", data, {
+      const response = await API.post("/employee/add", data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

@@ -1,6 +1,7 @@
 import Department from "../models/Department.js";
 import Employee from "../models/Employee.js";
 import Leave from "../models/Leave.js";
+import Attendance from "../models/Attendance.js";
 
 const getSummary = async (req, res) => {
   try {
@@ -47,6 +48,101 @@ const getSummary = async (req, res) => {
       rejected:
         leaveStatus.find((l) => l._id === "Rejected")?.count || 0,
     };
+// ==========================
+    // Today's Workforce Overview
+    // ==========================
+
+    const now = new Date();
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date(now);
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const todayMonth = now.getMonth() + 1;
+    const todayDay = now.getDate();
+
+    const onLeaveToday = await Leave.distinct("employeeId", {
+      status: "Approved",
+      startDate: { $lte: endOfToday },
+      endDate: { $gte: startOfToday },
+    });
+
+    const birthdaysToday = await Employee.countDocuments({
+      dob: { $exists: true, $ne: null },
+      $expr: {
+        $and: [
+          { $eq: [{ $month: "$dob" }, todayMonth] },
+          { $eq: [{ $dayOfMonth: "$dob" }, todayDay] },
+        ],
+      },
+    });
+
+    const workAnniversariesToday = await Employee.countDocuments({
+      createdAt: { $lt: startOfToday },
+      $expr: {
+        $and: [
+          { $eq: [{ $month: "$createdAt" }, todayMonth] },
+          { $eq: [{ $dayOfMonth: "$createdAt" }, todayDay] },
+        ],
+      },
+    });
+
+    // ==========================
+// Today's Attendance
+// ==========================
+
+const todayAttendance = await Attendance.find({
+  date: {
+    $gte: startOfToday,
+    $lte: endOfToday,
+  },
+});
+
+const presentToday = todayAttendance.filter(
+  (record) =>
+    record.status === "Present" &&
+    record.workMode === "On-site"
+).length;
+
+const remoteToday = todayAttendance.filter(
+  (record) =>
+    record.status === "Present" &&
+    record.workMode === "Remote"
+).length;
+
+const attendanceOnLeave = todayAttendance.filter(
+  (record) => record.status === "On Leave"
+).length;
+
+// Employees with an approved leave record are already
+// accounted for by onLeaveToday.
+const totalOnLeave = Math.max(
+  onLeaveToday.length,
+  attendanceOnLeave
+);
+
+// An employee is considered absent if they:
+// - are not on approved leave
+// - do not have a Present/Remote attendance record
+const employeesAccountedFor =
+  presentToday +
+  remoteToday +
+  totalOnLeave;
+
+const absentToday = Math.max(
+  totalEmployees - employeesAccountedFor,
+  0
+);
+
+const workforceOverview = {
+  present: presentToday,
+  remote: remoteToday,
+  onLeave: totalOnLeave,
+  absent: absentToday,
+  birthdays: birthdaysToday,
+  anniversaries: workAnniversariesToday,
+};
 
     // ==========================
     // Recent Employees
@@ -107,7 +203,7 @@ const getSummary = async (req, res) => {
     // Employee Growth (Last 6 Months)
     // ==========================
 
-    const employeeGrowth = await Employee.aggregate([
+    const employeeGrowthRaw = await Employee.aggregate([
       {
         $group: {
           _id: {
@@ -125,34 +221,54 @@ const getSummary = async (req, res) => {
           "_id.month": 1,
         },
       },
-      {
-        $limit: 6,
-      },
     ]);
+    
+    const months = [
+      "",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    
+    const employeeGrowth = employeeGrowthRaw
+      .slice(-6)
+      .map((item) => ({
+        month: months[item._id.month],
+        employees: item.employees,
+      }));
 
     // ==========================
     // Response
     // ==========================
 
-    return res.status(200).json({
+    return res.json({
       success: true,
-
-      summary: {
-        totalEmployees,
-        totalDepartments,
-        monthlyPayroll,
-      },
-
+  
+      totalEmployees,
+      totalDepartments,
+      totalSalary: monthlyPayroll,
+  
       leaveSummary,
-
+      
+      workforceOverview,
+  
       recentEmployees,
-
+  
       recentLeaves,
-
+  
       departmentDistribution,
-
+  
       employeeGrowth,
-    });
+  });
   } catch (error) {
     console.error(error);
 

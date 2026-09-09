@@ -8,7 +8,6 @@ const Add = ({ onLeaveAdded }) => {
   const navigate = useNavigate();
 
   const [leave, setLeave] = useState({
-    employeeId: user?._id || "",
     leaveType: "",
     startDate: "",
     endDate: "",

@@ -1,98 +1,116 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
-  FaBuilding,
-  FaCogs,
-  FaMoneyBillWave,
   FaTachometerAlt,
-  FaUsers,
+  FaUser,
+  FaCalendarCheck,
   FaCalendarAlt,
+  FaMoneyBillWave,
+  FaCog,
 } from "react-icons/fa";
+
 import { useAuth } from "../../context/authContext";
 
-
-/** Reusable Sidebar Link */
 const SidebarLink = ({ to, icon, label }) => {
-  if (!to || !label) return null;
-
   return (
     <NavLink
       to={to}
+      end
       className={({ isActive }) =>
-        `flex items-center gap-3 px-4 py-2.5 rounded-md transition-all duration-200 ${
+        `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
           isActive
-            ? "bg-emerald-600 text-white font-semibold shadow-md"
-            : "hover:bg-gray-800 hover:text-emerald-400"
+            ? "bg-emerald-600 text-white shadow-md"
+            : "text-slate-300 hover:bg-slate-800 hover:text-emerald-400"
         }`
       }
     >
       <span className="text-lg">{icon}</span>
-      <span className="text-base">{label}</span>
+      <span className="font-medium">{label}</span>
     </NavLink>
   );
 };
 
-/** Main Sidebar Component */
 const Sidebar = () => {
-  const { user } = useAuth() || {}; // get user safely
-  if (!user) {
-    return (
-      <aside className="bg-gray-900 text-gray-400 h-screen flex items-center justify-center">
-        <p>Loading user data...</p>
-      </aside>
-    );
-  }
-
-  // ✅ Define isAdmin BEFORE return
-  const isAdmin = user.role === "admin";
+  const { user } = useAuth();
 
   return (
-    <aside className="bg-gray-900 text-gray-200 h-screen fixed left-0 top-0 w-64 shadow-lg flex flex-col">
-      
-      {/* Header */}
-      <div className="bg-emerald-600 h-16 flex items-center justify-center shadow-md">
-        <h3 className="text-2xl font-bold text-white">Employee MS</h3>
+    <div className="h-full flex flex-col">
+
+      {/* Logo */}
+      <div className="h-20 border-b border-slate-800 flex flex-col justify-center px-6">
+        <h1 className="text-2xl font-bold text-white">
+          EmployeeMS
+        </h1>
+
+        <p className="text-xs text-slate-400 mt-1">
+          Employee Portal
+        </p>
+      </div>
+
+      {/* User */}
+      <div className="px-5 py-5 border-b border-slate-800">
+        <p className="text-sm text-slate-400">
+          Signed in as
+        </p>
+
+        <p className="font-semibold text-white mt-1 truncate">
+          {user?.name || "Employee"}
+        </p>
+
+        <p className="text-xs text-emerald-400 mt-1">
+          Employee
+        </p>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 mt-6 space-y-1 px-3">
-        {isAdmin ? (
-          <>
-            <SidebarLink to="/admin-dashboard" icon={<FaTachometerAlt />} label="Dashboard" />
-            <SidebarLink to="/admin-dashboard/employees" icon={<FaUsers />} label="Employees" />
-            <SidebarLink to="/admin-dashboard/departments" icon={<FaBuilding />} label="Departments" />
-            <SidebarLink to="/admin-dashboard/leave" icon={<FaCalendarAlt />} label="Leave" />
-            <SidebarLink to="/admin-dashboard/salary" icon={<FaMoneyBillWave />} label="Salary" />
-            <SidebarLink to="/admin-dashboard/settings" icon={<FaCogs />} label="Settings" />
-          </>
-        ) : (
-          <>
-            <SidebarLink to="/employee-dashboard" icon={<FaTachometerAlt />} label="Dashboard" />
-            <SidebarLink
-              to={`/employee-dashboard/profile/${user._id || "unknown"}`}
-              icon={<FaUsers />}
-              label="My Profile"
-            />
-            <SidebarLink
-              to={`/employee-dashboard/leaves/${user._id || "unknown"}`}
-              icon={<FaCalendarAlt />}
-              label="Leaves"
-            />
-            <SidebarLink
-              to={`/employee-dashboard/salary/${user._id || "unknown"}`}
-              icon={<FaMoneyBillWave />}
-              label="Salary"
-            />
-            <SidebarLink to="/employee-dashboard/setting" icon={<FaCogs />} label="Settings" />
-          </>
-        )}
+      <nav className="flex-1 px-4 py-6 space-y-2">
+
+        <SidebarLink
+          to="/employee-dashboard"
+          icon={<FaTachometerAlt />}
+          label="Dashboard"
+        />
+
+        <SidebarLink
+          to={`/employee-dashboard/profile/${user?._id}`}
+          icon={<FaUser />}
+          label="My Profile"
+        />
+
+        <SidebarLink
+          to="/employee-dashboard/attendance"
+          icon={<FaCalendarCheck />}
+          label="My Attendance"
+        />
+
+<SidebarLink
+  to={`/employee-dashboard/leaves/${user?._id}`}
+  icon={<FaCalendarAlt />}
+  label="My Leave"
+/>
+
+        <SidebarLink
+          to={`/employee-dashboard/salary/${user?._id}`}
+          icon={<FaMoneyBillWave />}
+          label="My Salary"
+        />
+
+        <SidebarLink
+          to="/employee-dashboard/settings"
+          icon={<FaCog />}
+          label="Settings"
+        />
+
       </nav>
 
       {/* Footer */}
-      <div className="bg-gray-800 text-center py-3 text-sm text-gray-400">
-        © {new Date().getFullYear()} EmployeeMS
+      <div className="border-t border-slate-800 px-5 py-4">
+        <p className="text-xs text-slate-500 text-center">
+          © {new Date().getFullYear()} SmartJobs Ltd
+        </p>
       </div>
-    </aside>
+
+    </div>
   );
 };
 
