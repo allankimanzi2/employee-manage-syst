@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../../utils/api';
@@ -17,20 +18,24 @@ const AddDepartment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const response = await API.post(
-        '/department', department, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+        '/department',
+        department,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
         }
-      });
+      );
 
       if (response.data.success) {
-        navigate("/admin-dashboard/departments");
+        navigate('/admin-dashboard/departments');
       }
     } catch (error) {
-      console.error("ADD DEPARTMENT ERROR:", error);
-    
+      console.error('ADD DEPARTMENT ERROR:', error);
+
       if (error.response) {
         alert(
           error.response.data?.error ||
@@ -38,20 +43,24 @@ const AddDepartment = () => {
           `Request failed with status ${error.response.status}`
         );
       } else {
-        alert("Something went wrong!");
-
-        
+        alert('Something went wrong!');
+      }
     }
   };
 
   return (
     <div className="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-md shadow-md">
       <h2 className="text-2xl font-bold mb-6">Add New Department</h2>
+
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="dep_name" className="text-sm font-medium text-gray-700">
+          <label
+            htmlFor="dep_name"
+            className="text-sm font-medium text-gray-700"
+          >
             Department Name
           </label>
+
           <input
             id="dep_name"
             type="text"
@@ -65,9 +74,13 @@ const AddDepartment = () => {
         </div>
 
         <div className="mt-3">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700"
+          >
             Description
           </label>
+
           <textarea
             id="description"
             name="description"
