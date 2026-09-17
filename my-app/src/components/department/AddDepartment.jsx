@@ -19,7 +19,7 @@ const AddDepartment = () => {
     e.preventDefault();
     try {
       const response = await API.post(
-        '/department/add', department, {
+        '/department', department, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -29,11 +29,18 @@ const AddDepartment = () => {
         navigate("/admin-dashboard/departments");
       }
     } catch (error) {
-      if (error.response && !error.response.data.success) {
-        alert(error.response.data.error);
-      }else {
+      console.error("ADD DEPARTMENT ERROR:", error);
+    
+      if (error.response) {
+        alert(
+          error.response.data?.error ||
+          error.response.data?.message ||
+          `Request failed with status ${error.response.status}`
+        );
+      } else {
         alert("Something went wrong!");
-      }
+
+        
     }
   };
 
